@@ -8,6 +8,18 @@
 <br><br>
 <input type="password" placeholder="Password">
 <br><br>
-<button onclick="alert('Login button chal raha hai!')">Login</button>
+<button onclick="login()">Login</button>
+<script>
+function login() {
+  var u = document.getElementById("username").value;
+  var p = document.querySelector('input[type="password"]').value;
+
+  if (u === "sahil" && p === "1234") {
+    alert("Login successful!");
+  } else {
+    alert("Wrong username or password!");
+  }
+}
+</script>
 </body>
 </html>

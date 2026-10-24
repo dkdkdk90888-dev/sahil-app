@@ -18,11 +18,15 @@
 <p>App: Sahil App</p>
 <button onclick="logout()">Logout</button>
 </div>
-<script>me
+<script>
 
+function logout() {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("login").style.display = "block";
+}
 function login() {
   var u = document.getElementById("username").value;
-  var p = document.querySelector('input[type="password"]').value;
+  var p = document.querySelector('input[type="password"]').v
 
   if (u === "sahil" && p === "1234") {
     document.getElementById("home").style.display = "block";

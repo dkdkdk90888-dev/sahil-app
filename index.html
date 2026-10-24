@@ -9,6 +9,13 @@
 <input type="password" placeholder="Password">
 <br><br>
 <button onclick="login()">Login</button>
+<div id="home" style="display:none">
+<h1>Welcome, Sahil!</h1>
+<h2>My Profile</h2>
+<p>Name: Sahil</p>
+<p>App: Sahil App</p>
+<button onclick="logout()">Logout</button>
+</div>
 <script>
 function login() {
   var u = document.getElementById("username").value;

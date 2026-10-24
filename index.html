@@ -3,12 +3,14 @@
 <body>
 <h1>Hello Sahil!</h1>
 <button onclick="alert('App chal gayi!')">Click Me</button>
+<div id="login">
 <h2>Login</h2>
 <input id="username" placeholder="Username">
 <br><br>
 <input type="password" placeholder="Password">
 <br><br>
 <button onclick="login()">Login</button>
+</div>
 <div id="home" style="display:none">
 <h1>Welcome, Sahil!</h1>
 <h2>My Profile</h2>
@@ -16,13 +18,15 @@
 <p>App: Sahil App</p>
 <button onclick="logout()">Logout</button>
 </div>
-<script>
+<script>me
+
 function login() {
   var u = document.getElementById("username").value;
   var p = document.querySelector('input[type="password"]').value;
 
   if (u === "sahil" && p === "1234") {
-    alert("Login successful!");
+    document.getElementById("home").style.display = "block";
+document.getElementById("login").style.display = "none";
   } else {
     alert("Wrong username or password!");
   }

@@ -1,145 +1,289 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sahil App</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 16px;
+      background: #090909;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 390px;
+      background: #171717;
+      border: 1px solid #343434;
+      border-radius: 20px;
+      padding: 28px 22px;
+      box-shadow: 0 12px 40px #00000080;
+    }
+
+    h1 { margin-top: 0; }
+
+    .brand {
+      color: #ff3030;
+      text-align: center;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      color: #aaaaaa;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h2 { margin-top: 0; }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #444444;
+      background: #242424;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #e51b23;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .secondary {
+      background: #292929;
+      border: 1px solid #555555;
+    }
+
+    .profile-box {
+      padding: 14px;
+      margin: 12px 0;
+      border-radius: 10px;
+      background: #242424;
+      overflow-wrap: anywhere;
+    }
+
+    .label { color: #aaaaaa; }
+    #message {
+      color: #ff7777;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+
 <body>
-  <h1>Hello Sahil!</h1>
+  <main class="card">
+    <section id="login">
+      <h1 class="brand">SAHIL APP</h1>
+      <p class="subtitle">Your account. Your profile.</p>
 
-  <div id="login">
-    <h2>Login</h2>
-   <input id="username" type="email" placeholder="Email address">
-<br><br>
-<input id="password" type="password" placeholder="Password (minimum 6 characters)">
-<br><br>
-<button onclick="login()">Login</button>
-<button onclick="signup()">Create Account</button>
+      <h2>Welcome</h2>
+      <input id="username" type="email"
+        placeholder="Email address" autocomplete="email">
 
-  </div>
+      <input id="password" type="password"
+        placeholder="Password (minimum 6 characters)"
+        autocomplete="current-password">
 
-  <div id="home" style="display:none">
-    <h1>Welcome, Sahil!</h1>
-    
-<h2>My Profile</h2>
-<p id="profileName">Name: Sahil</p>
-<p id="profileEmail">Email:</p>
-<p>App: Sahil App</p>
-<button onclick="logout()">Logout</button>
-    <button onclick="logout()">Logout</button>
-  </div>
+      <button id="loginBtn" onclick="login()">Login</button>
+      <button id="signupBtn" class="secondary"
+        onclick="signup()">Create Account</button>
 
-  
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      <p id="message" role="status"></p>
+    </section>
 
-// Yahan apna poora firebaseConfig object paste karna hai
-const firebaseConfig = PASTE_YOUR_CONFIG_HERE;
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyB_EQa914negHJUDyHwIU7QzI26nnv445U",
-  authDomain: "sahilapp-22410.firebaseapp.com",
-  projectId: "sahilapp-22410",
-  storageBucket: "sahilapp-22410.firebasestorage.app",
-  messagingSenderId: "1062905599098",
-  appId: "1:1062905599098:web:a114d33d78c40f3293d7c3",
-  measurementId: "G-1Q1379E1DH"
-};
+    <section id="home" class="hidden">
+      <h1 class="brand">SAHIL APP</h1>
+      <p class="subtitle">You're logged in!</p>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+      <h2>My Profile</h2>
 
-window.login = async function () {
-  const email = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+      <div class="profile-box">
+        <p id="profileName">Name: Sahil</p>
+        <p id="profileEmail"></p>
+        <p class="label">App: Sahil App</p>
+      </div>
 
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    await showProfile(result.user);
-  } catch (error) {
-    alert("Login nahi hua: " + error.message);
-  }
-};
+      <button onclick="logout()">Logout</button>
+      <p id="homeMessage" role="status"></p>
+    </section>
+  </main>
 
-window.signup = async function () {
-  const email = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", result.user.uid), {
-      email: result.user.email,
-      name: "Sahil"
-    });
-    await showProfile(result.user);
-  } catch (error) {
-    alert("Account nahi bana: " + error.message);
-  }
-};
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-async function showProfile(user) {
-  const profileRef = doc(db, "users", user.uid);
-  const profileSnap = await getDoc(profileRef);
-  const profile = profileSnap.exists() ? profileSnap.data() : {};
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  document.getElementById("home").style.display = "block";
-  document.getElementById("login").style.display = "none";
+    const firebaseConfig = {
+      apiKey: "AIzaSyB_EQa914negHJUDyHwIU7QzI26nnv445U",
+      authDomain: "sahilapp-22410.firebaseapp.com",
+      projectId: "sahilapp-22410",
+      storageBucket: "sahilapp-22410.firebasestorage.app",
+      messagingSenderId: "1062905599098",
+      appId: "1:1062905599098:web:a114d33d78c40f3293d7c3",
+      measurementId: "G-1Q1379E1DH"
+    };
 
-  const nameLine = document.getElementById("profileName");
-  if (nameLine) nameLine.textContent = "Name: " + (profile.name || "Sahil");
-  const emailLine = document.getElementById("profileEmail");
-  if (emailLine) emailLine.textContent = "Email: " + user.email;
-}
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-window.logout = async function () {
-  await signOut(auth);
-  document.getElementById("home").style.display = "none";
-  document.getElementById("login").style.display = "block";
-};
-</script>
+    const $ = id => document.getElementById(id);
 
+    function showMessage(message) {
+      $("message").textContent = message;
+    }
+
+    function explainError(error) {
+      const messages = {
+        "auth/invalid-email": "Email address sahi nahi hai.",
+        "auth/missing-password": "Password daalo.",
+        "auth/weak-password": "Password kam se kam 6 characters ka rakho.",
+        "auth/email-already-in-use": "Is email ka account pehle se hai. Login karo.",
+        "auth/invalid-credential": "Email ya password galat hai.",
+        "auth/network-request-failed": "Internet check karke dobara try karo.",
+        "auth/operation-not-allowed": "Firebase mein Email/Password sign-in enable karo."
+      };
+
+      return messages[error.code] ||
+        "Error: " + error.code + " — " + error.message;
+    }
+
+    function setBusy(busy) {
+      $("loginBtn").disabled = busy;
+      $("signupBtn").disabled = busy;
+    }
+
+    async function showProfile(user) {
+      $("homeMessage").textContent = "Profile load ho rahi hai...";
+
+      try {
+        const profileRef = doc(db, "users", user.uid);
+        const profileSnap = await getDoc(profileRef);
+        const profile = profileSnap.exists() ? profileSnap.data() : {};
+
+        $("profileName").textContent = "Name: " + (profile.name || "Sahil");
+        $("profileEmail").textContent = "Email: " + (user.email || "");
+
+        $("login").classList.add("hidden");
+        $("home").classList.remove("hidden");
+        $("homeMessage").textContent = "";
+      } catch (error) {
+        $("homeMessage").textContent = explainError(error);
+      }
+    }
+
+    window.login = async function () {
+      const email = $("username").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password) {
+        showMessage("Email aur password dono daalo.");
+        return;
+      }
+
+      setBusy(true);
+      showMessage("Login ho raha hai...");
+
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await showProfile(result.user);
+      } catch (error) {
+        showMessage(explainError(error));
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    window.signup = async function () {
+      const email = $("username").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password) {
+        showMessage("Email aur password dono daalo.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("Password kam se kam 6 characters ka rakho.");
+        return;
+      }
+
+      setBusy(true);
+      showMessage("Account ban raha hai...");
+
+      try {
+        const result = await createUserWithEmailAndPassword(
+          auth, email, password
+        );
+
+        await setDoc(doc(db, "users", result.user.uid), {
+          name: "Sahil",
+          email: result.user.email
+        });
+
+        await showProfile(result.user);
+      } catch (error) {
+        showMessage(explainError(error));
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    window.logout = async function () {
+      try {
+        await signOut(auth);
+        $("home").classList.add("hidden");
+        $("login").classList.remove("hidden");
+        $("password").value = "";
+        showMessage("Logout ho gaya.");
+      } catch (error) {
+        $("homeMessage").textContent = explainError(error);
+      }
+    };
+  </script>
 </body>
-
-<style>
-  body {
-    background: #101827;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-  }
-
-  input {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #64748b;
-    margin: 5px;
-    width: 80%;
-    max-width: 280px;
-  }
-
-  button {
-    background: #7c3aed;
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    margin: 8px;
-    font-size: 16px;
-  }
-
-  button:active {
-    background: #5b21b6;
-  }
-</style>
-
 </html>
+

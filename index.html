@@ -322,6 +322,13 @@ window.saveProfile = async function () {
       }
     };
   </script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sahil-app/sw.js")
+        .catch((error) => console.error("Service Worker error:", error));
+    });
+  }
+</script>
 </body>
 </html>
 

@@ -493,6 +493,153 @@ window.saveProfile = async function () {
 
   <p id="dailyScore">Score: 0 / 100</p>
 </section>
+
+<!-- SAHIL APP: DAILY QUESTION CHALLENGE -->
+<section id="daily-challenge" style="background:#111;color:white;padding:20px;margin:20px 0;border:1px solid #e51b23;border-radius:18px;font-family:Arial,sans-serif;">
+  <div style="color:#ff424a;font-weight:bold;">🔥 SAHIL DAILY CHALLENGE</div>
+  <h2 style="margin-bottom:8px;">Aaj ka sawaal</h2>
+  <p id="dq-date" style="color:#aaa;font-size:13px;"></p>
+  <h3 id="dq-question">Question loading...</h3>
+  <div id="dq-options"></div>
+  <button id="dq-submit" type="button" style="background:#e51b23;color:white;border:0;border-radius:10px;padding:12px 18px;margin-top:14px;font-weight:bold;">
+    Submit Answer
+  </button>
+  <p id="dq-result" aria-live="polite"></p>
+  <button id="dq-share" type="button" style="background:#292929;color:white;border:1px solid #555;border-radius:10px;padding:12px 18px;">
+    Share with Friends 📲
+  </button>
+  <p style="font-size:12px;color:#aaa;">Roz ek naya sawaal. Doston ko bhi challenge karo!</p>
+</section>
+
+<style>
+#dq-options label {
+  display:block;
+  background:#222;
+  border:1px solid #444;
+  border-radius:10px;
+  padding:12px;
+  margin:9px 0;
+  cursor:pointer;
+}
+#dq-options input { margin-right:9px; accent-color:#e51b23; }
+#dq-options label:has(input:checked) { border-color:#e51b23; }
+#dq-submit, #dq-share { cursor:pointer; font-size:14px; }
+#dq-submit:active, #dq-share:active { opacity:.8; }
+</style>
+
+<script>
+(function () {
+  const questions = [
+    {
+      q: "Agar free mein kahin bhi travel kar sako, kahan jaoge?",
+      options: ["Dubai 🏙️", "Switzerland 🏔️", "Maldives 🏝️", "Japan 🇯🇵"]
+    },
+    {
+      q: "Tumhare liye sabse important kya hai?",
+      options: ["Family ❤️", "Paisa 💰", "Dosti 🤝", "Sukoon 🌿"]
+    },
+    {
+      q: "Ek superpower choose karni ho toh?",
+      options: ["Udna 🦅", "Invisible hona 👻", "Future dekhna 🔮", "Teleport hona ⚡"]
+    },
+    {
+      q: "Weekend par tum kya karna pasand karoge?",
+      options: ["Travel 🚗", "Movies 🎬", "Friends ke saath 😎", "Ghar par rest 😴"]
+    },
+    {
+      q: "Tumhara dream goal kya hai?",
+      options: ["Successful business 🚀", "Duniya ghoomna 🌍", "Family ko khush rakhna ❤️", "Sab kuch seekhna 🧠"]
+    },
+    {
+      q: "Apne dost ko ek word mein kaise describe karoge?",
+      options: ["Loyal 🤝", "Funny 😂", "Caring ❤️", "Crazy 🤪"]
+    },
+    {
+      q: "Tum kis type ke content ko sabse zyada share karte ho?",
+      options: ["Funny memes 😂", "Motivation 🔥", "Love ❤️", "Facts 🧠"]
+    }
+  ];
+
+  const now = new Date();
+  const dayNumber = Math.floor(
+    Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000
+  );
+  const today = questions[((dayNumber % questions.length) + questions.length) % questions.length];
+  const dateKey = "sahil-dq-" + now.getFullYear() + "-" +
+    (now.getMonth() + 1) + "-" + now.getDate();
+
+  const questionEl = document.getElementById("dq-question");
+  const optionsEl = document.getElementById("dq-options");
+  const resultEl = document.getElementById("dq-result");
+
+  document.getElementById("dq-date").textContent =
+    now.toLocaleDateString("en-IN", {
+      day: "numeric", month: "long", year: "numeric"
+    });
+
+  questionEl.textContent = today.q;
+
+  today.options.forEach(function (option, index) {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "daily-answer";
+    input.value = option;
+    input.id = "dq-option-" + index;
+
+    label.htmlFor = input.id;
+    label.appendChild(input);
+    label.appendChild(document.createTextNode(option));
+    optionsEl.appendChild(label);
+  });
+
+  document.getElementById("dq-submit").addEventListener("click", function () {
+    const selected = document.querySelector('input[name="daily-answer"]:checked');
+
+    if (!selected) {
+      resultEl.textContent = "Pehle apna answer select karo 😊";
+      return;
+    }
+
+    try {
+      localStorage.setItem(dateKey, selected.value);
+    } catch (e) {}
+
+    resultEl.textContent = "Tumhara answer: " + selected.value + " 🎉";
+  });
+
+  document.getElementById("dq-share").addEventListener("click", async function () {
+    const shareText = "🔥 Sahil Daily Challenge!\n\n" +
+      today.q + "\n\nTumhara answer kya hai? Apna answer Sahil App par do!\n" +
+      "https://dkdkdk90888-dev.github.io/sahil-app/";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Sahil Daily Challenge", text: shareText });
+      } catch (e) {}
+    } else {
+      window.open(
+        "https://wa.me/?text=" + encodeURIComponent(shareText),
+        "_blank"
+      );
+    }
+  });
+
+  try {
+    const saved = localStorage.getItem(dateKey);
+    if (saved && today.options.includes(saved)) {
+      const input = Array.from(
+        document.querySelectorAll('input[name="daily-answer"]')
+      ).find(function (el) { return el.value === saved; });
+
+      if (input) {
+        input.checked = true;
+        resultEl.textContent = "Tumhara aaj ka answer: " + saved;
+      }
+    }
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
 

@@ -1,0 +1,490 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahil App - Daily Quiz</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#101010;
+  color:white;
+}
+header{
+  background:#e50914;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+h1{margin:0;font-size:23px}
+button{
+  border:0;
+  border-radius:9px;
+  padding:12px 16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.primary{background:#e50914;color:white;width:100%;margin-top:12px}
+.secondary{background:#333;color:white;margin:4px}
+input{
+  width:100%;
+  padding:13px;
+  margin:8px 0;
+  border:1px solid #555;
+  border-radius:8px;
+  background:#202020;
+  color:white;
+}
+.container{
+  width:100%;
+  max-width:520px;
+  margin:25px auto;
+  padding:18px;
+}
+.card{
+  background:#1d1d1d;
+  padding:20px;
+  border-radius:15px;
+  border:1px solid #383838;
+  margin-bottom:16px;
+}
+h2{font-size:22px}
+.small{color:#bbb;font-size:14px}
+.option{
+  display:block;
+  width:100%;
+  margin:10px 0;
+  text-align:left;
+  background:#303030;
+  color:white;
+  border:2px solid #444;
+}
+.option.selected{border-color:#e50914;background:#481a1c}
+.option:disabled{opacity:1}
+#loading{text-align:center;padding:50px}
+.hidden{display:none!important}
+.progress-bg{
+  height:9px;
+  background:#444;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0;
+}
+#progressBar{
+  height:100%;
+  width:0;
+  background:#e50914;
+}
+.notice{color:#ffb4b4;margin-top:12px}
+.good{color:#65e68a}
+.bad{color:#ff7777}
+footer{text-align:center;color:#888;padding:20px;font-size:12px}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>🔥 Sahil App</h1>
+  <button class="secondary" onclick="openProfile()">Profile</button>
+</header>
+
+<div id="loading">Loading Sahil App...</div>
+
+<section id="authView" class="container hidden">
+  <div class="card">
+    <h2>Welcome to Sahil App</h2>
+    <p class="small">Login once and start your daily challenge!</p>
+
+    <div id="signupNameBox" class="hidden">
+      <input id="signupName" placeholder="Your name">
+    </div>
+
+    <input id="email" type="email" placeholder="Email address" autocomplete="email">
+    <input id="password" type="password" placeholder="Password (minimum 6 characters)" autocomplete="current-password">
+
+    <button class="primary" onclick="login()">Login</button>
+    <button class="secondary" onclick="signup()">Create New Account</button>
+    <p id="authMessage" class="notice"></p>
+  </div>
+</section>
+
+<section id="quizView" class="container hidden">
+  <div class="card">
+    <h2 id="welcome">Daily Question Challenge</h2>
+    <p class="small">100 questions every day. Test your knowledge!</p>
+
+    <div class="progress-bg"><div id="progressBar"></div></div>
+    <p id="progressText" class="small"></p>
+    <h2 id="questionText">Question</h2>
+    <div id="options"></div>
+    <p id="answerMessage"></p>
+    <button id="quizButton" class="primary" onclick="submitOrNext()">Submit Answer</button>
+    <p id="quizMessage" class="notice"></p>
+  </div>
+
+  <div class="card">
+    <h3>Your Daily Score</h3>
+    <p id="scoreText">Score: 0</p>
+    <button class="secondary" onclick="openProfile()">Edit Profile</button>
+    <button class="secondary" onclick="shareApp()">Share with Friends</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+  </div>
+</section>
+
+<section id="resultView" class="container hidden">
+  <div class="card">
+    <h2>🎉 Challenge Completed!</h2>
+    <p id="finalScore"></p>
+    <p id="finalMessage"></p>
+    <p class="small">Your next daily challenge will be available tomorrow.</p>
+    <button class="primary" onclick="openProfile()">View Profile</button>
+    <button class="secondary" onclick="shareApp()">Invite Friends</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+  </div>
+</section>
+
+<section id="profileView" class="container hidden">
+  <div class="card">
+    <h2>My Profile</h2>
+    <label>Name</label>
+    <input id="profileName" placeholder="Enter your name">
+    <label>Email</label>
+    <input id="profileEmail" disabled>
+    <button class="primary" onclick="saveProfile()">Save Profile</button>
+    <button class="secondary" onclick="backToQuiz()">Back to Quiz</button>
+    <button class="secondary" onclick="shareApp()">Share App</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+    <p id="profileMessage" class="notice"></p>
+  </div>
+</section>
+
+<footer>Sahil App • Daily Quiz Challenge</footer>
+
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB_EQa914negHJUDyHwIU7QzI26nnv445U",
+  authDomain: "sahilapp-22410.firebaseapp.com",
+  projectId: "sahilapp-22410",
+  storageBucket: "sahilapp-22410.firebasestorage.app",
+  messagingSenderId: "1062905599098",
+  appId: "1:1062905599098:web:a114d33d78c40f3293d7c3",
+  measurementId: "G-1Q1379E1DH"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let profileName = "Sahil";
+let currentScreen = "quiz";
+let quizState = null;
+
+/* 100 general-knowledge questions */
+const questions = [
+{q:"What is the capital of India?",o:["Mumbai","New Delhi","Kolkata","Chennai"],a:1},
+{q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Mercury"],a:1},
+{q:"How many days are there in a normal year?",o:["364","365","366","360"],a:1},
+{q:"Which is the largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2},
+{q:"What is the national animal of India?",o:["Lion","Tiger","Elephant","Leopard"],a:1},
+{q:"Which gas do humans need to breathe?",o:["Oxygen","Helium","Hydrogen","Neon"],a:0},
+{q:"How many sides does a triangle have?",o:["2","3","4","5"],a:1},
+{q:"Which is the closest star to Earth?",o:["Sirius","Sun","Polaris","Vega"],a:1},
+{q:"What is 12 × 5?",o:["50","55","60","65"],a:2},
+{q:"Which language is mainly used to style web pages?",o:["HTML","CSS","SQL","Python"],a:1},
+{q:"Which is the largest planet in our solar system?",o:["Earth","Saturn","Jupiter","Neptune"],a:2},
+{q:"What is the currency of Japan?",o:["Yuan","Yen","Won","Rupee"],a:1},
+{q:"How many hours are there in one day?",o:["12","18","24","36"],a:2},
+{q:"Which organ pumps blood around the body?",o:["Lungs","Brain","Heart","Kidney"],a:2},
+{q:"What is the boiling point of water at sea level?",o:["50°C","75°C","100°C","150°C"],a:2},
+{q:"Which is the national bird of India?",o:["Parrot","Peacock","Eagle","Sparrow"],a:1},
+{q:"Which continent is India in?",o:["Europe","Asia","Africa","Australia"],a:1},
+{q:"What is 100 divided by 4?",o:["20","25","40","50"],a:1},
+{q:"Which animal is often called the ship of the desert?",o:["Horse","Camel","Donkey","Yak"],a:1},
+{q:"How many colours are traditionally named in a rainbow?",o:["5","6","7","8"],a:2},
+{q:"Which is the smallest prime number?",o:["0","1","2","3"],a:2},
+{q:"Which festival is known as the festival of lights in India?",o:["Holi","Diwali","Eid","Pongal"],a:1},
+{q:"What is the freezing point of water?",o:["0°C","10°C","32°C","100°C"],a:0},
+{q:"Which device is used to type on a computer?",o:["Monitor","Keyboard","Speaker","Printer"],a:1},
+{q:"What does CPU stand for?",o:["Central Processing Unit","Computer Power Utility","Control Program User","Central Print Unit"],a:0},
+{q:"Which planet do we live on?",o:["Mars","Earth","Venus","Saturn"],a:1},
+{q:"How many months are in a year?",o:["10","11","12","13"],a:2},
+{q:"Which is the largest mammal?",o:["Elephant","Blue whale","Giraffe","Hippopotamus"],a:1},
+{q:"Which part of a plant absorbs water?",o:["Flower","Leaf","Root","Fruit"],a:2},
+{q:"What is 9 squared?",o:["18","72","81","99"],a:2},
+{q:"Which country is famous for the Eiffel Tower?",o:["Italy","France","Spain","Germany"],a:1},
+{q:"Which ocean lies south of India?",o:["Pacific","Arctic","Indian","Atlantic"],a:2},
+{q:"Which sense organ helps us hear?",o:["Eye","Ear","Nose","Tongue"],a:1},
+{q:"How many minutes are in one hour?",o:["30","45","60","100"],a:2},
+{q:"Which metal is liquid at ordinary room temperature?",o:["Iron","Copper","Mercury","Aluminium"],a:2},
+{q:"What is the opposite of hot?",o:["Warm","Cold","Dry","Bright"],a:1},
+{q:"Which animal lays eggs?",o:["Cat","Dog","Hen","Cow"],a:2},
+{q:"Which is the fastest land animal?",o:["Lion","Cheetah","Horse","Tiger"],a:1},
+{q:"What is 15 + 27?",o:["32","42","52","43"],a:1},
+{q:"Which shape has four equal sides and four right angles?",o:["Triangle","Circle","Square","Oval"],a:2},
+{q:"What is the capital of Maharashtra?",o:["Pune","Nagpur","Mumbai","Nashik"],a:2},
+{q:"Which Indian city is known as the Pink City?",o:["Jaipur","Surat","Bhopal","Patna"],a:0},
+{q:"Which is the main source of energy for Earth?",o:["Moon","Sun","Wind only","Coal"],a:1},
+{q:"What do bees collect from flowers?",o:["Sand","Nectar","Leaves","Bark"],a:1},
+{q:"Which is a primary colour of light?",o:["Red","Brown","Pink","Black"],a:0},
+{q:"Which instrument measures temperature?",o:["Barometer","Thermometer","Compass","Ruler"],a:1},
+{q:"Which sport uses a bat and wicket?",o:["Football","Cricket","Hockey","Tennis"],a:1},
+{q:"How many players from one team are on the field in football?",o:["7","9","11","12"],a:2},
+{q:"Which country hosted the Taj Mahal?",o:["India","Nepal","Iran","Turkey"],a:0},
+{q:"Which is the largest hot desert in the world?",o:["Gobi","Sahara","Thar","Kalahari"],a:1},
+{q:"What is the chemical formula of water?",o:["CO2","O2","H2O","NaCl"],a:2},
+{q:"Which gas do plants absorb during photosynthesis?",o:["Oxygen","Carbon dioxide","Nitrogen","Helium"],a:1},
+{q:"What is 7 × 8?",o:["54","56","58","64"],a:1},
+{q:"Which month comes after September?",o:["August","October","November","December"],a:1},
+{q:"How many legs does a spider have?",o:["6","8","10","12"],a:1},
+{q:"Which is the largest continent by area?",o:["Africa","Europe","Asia","South America"],a:2},
+{q:"What is the capital of the United Kingdom?",o:["London","Dublin","Manchester","Edinburgh"],a:0},
+{q:"Which part of the body is used for smelling?",o:["Ear","Nose","Eye","Hand"],a:1},
+{q:"Which bird cannot fly and is known for swimming?",o:["Eagle","Penguin","Crow","Pigeon"],a:1},
+{q:"What is 144 divided by 12?",o:["10","11","12","14"],a:2},
+{q:"Which is a renewable energy source?",o:["Coal","Petrol","Solar power","Diesel"],a:2},
+{q:"Which is the nearest planet to the Sun?",o:["Earth","Mercury","Mars","Neptune"],a:1},
+{q:"Which natural material comes from sheep?",o:["Silk","Wool","Cotton","Jute"],a:1},
+{q:"Which is the national flower of India?",o:["Rose","Lotus","Sunflower","Jasmine"],a:1},
+{q:"Which Indian monument is in Agra?",o:["Gateway of India","Taj Mahal","India Gate","Charminar"],a:1},
+{q:"What is the square root of 64?",o:["6","7","8","9"],a:2},
+{q:"Which is the largest bone in the human body?",o:["Femur","Skull","Rib","Radius"],a:0},
+{q:"What do we call a baby frog?",o:["Cub","Calf","Tadpole","Chick"],a:2},
+{q:"Which day comes after Friday?",o:["Thursday","Saturday","Sunday","Monday"],a:1},
+{q:"Which planet is famous for its rings?",o:["Mars","Saturn","Mercury","Earth"],a:1},
+{q:"What is the main language spoken in Brazil?",o:["Spanish","Portuguese","French","English"],a:1},
+{q:"How many centimetres are in one metre?",o:["10","50","100","1000"],a:2},
+{q:"Which vitamin can the body make with sunlight exposure?",o:["Vitamin A","Vitamin C","Vitamin D","Vitamin K"],a:2},
+{q:"Which instrument shows direction?",o:["Compass","Thermometer","Clock","Microscope"],a:0},
+{q:"What is the capital of Australia?",o:["Sydney","Melbourne","Canberra","Perth"],a:2},
+{q:"Which animal is known for changing its colour?",o:["Chameleon","Zebra","Rabbit","Camel"],a:0},
+{q:"What is 50% of 80?",o:["20","30","40","50"],a:2},
+{q:"Which is the hardest natural substance commonly known?",o:["Gold","Diamond","Iron","Quartz"],a:1},
+{q:"Which organ helps us think?",o:["Heart","Brain","Liver","Stomach"],a:1},
+{q:"Which is the longest river in India?",o:["Yamuna","Ganga","Godavari","Narmada"],a:1},
+{q:"What is the capital of Italy?",o:["Rome","Milan","Venice","Naples"],a:0},
+{q:"Which season is usually the coldest?",o:["Summer","Winter","Spring","Monsoon"],a:1},
+{q:"How many wheels does a standard bicycle have?",o:["1","2","3","4"],a:1},
+{q:"What do we call animals that eat only plants?",o:["Carnivores","Herbivores","Omnivores","Predators"],a:1},
+{q:"Which is the largest island in the world?",o:["Madagascar","Greenland","Sri Lanka","Borneo"],a:1},
+{q:"Which country is famous for the Great Wall?",o:["China","India","Japan","Thailand"],a:0},
+{q:"What is 11 × 11?",o:["111","121","131","101"],a:1},
+{q:"Which is the closest natural object to Earth in space?",o:["Sun","Moon","Mars","Venus"],a:1},
+{q:"Which blood cells help fight infections?",o:["Red blood cells","White blood cells","Platelets","Plasma only"],a:1},
+{q:"Which is the national aquatic animal of India?",o:["Blue whale","Ganges river dolphin","Shark","Turtle"],a:1},
+{q:"What is the capital of Kerala?",o:["Kochi","Kozhikode","Thiruvananthapuram","Kottayam"],a:2},
+{q:"Which device displays computer output visually?",o:["Keyboard","Monitor","Mouse","Microphone"],a:1},
+{q:"Which one is a web browser?",o:["Chrome","Excel","Paint","Calculator"],a:0},
+{q:"Which file extension is commonly used for HTML pages?",o:[".mp3",".jpg",".html",".exe"],a:2},
+{q:"What does WWW stand for?",o:["World Wide Web","World Web Window","Wide World Wire","Web World Work"],a:0},
+{q:"Which number is even?",o:["13","17","22","29"],a:2},
+{q:"What is 1000 minus 375?",o:["525","625","675","725"],a:1},
+{q:"Which animal is known as man's best friend?",o:["Cat","Dog","Horse","Cow"],a:1},
+{q:"Which Indian celebration is associated with colours?",o:["Holi","Diwali","Onam","Baisakhi"],a:0},
+{q:"Which ocean is between Africa and Australia?",o:["Indian Ocean","Arctic Ocean","Southern Ocean","Atlantic Ocean"],a:0},
+{q:"Which is the main natural source of light during the day?",o:["Moon","Sun","Stars","Fireflies"],a:1}
+];
+
+function showOnly(id){
+  ["loading","authView","quizView","resultView","profileView"].forEach(view=>{
+    document.getElementById(view).classList.toggle("hidden",view!==id);
+  });
+  currentScreen=id;
+}
+
+function todayString(){
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function storageKey(){
+  return "sahilQuiz_"+currentUser.uid+"_"+todayString();
+}
+
+function saveQuiz(){
+  if(!currentUser||!quizState)return;
+  try{localStorage.setItem(storageKey(),JSON.stringify(quizState));}
+  catch(e){console.log("Could not save quiz progress",e);}
+}
+
+function loadQuiz(){
+  try{
+    const saved=localStorage.getItem(storageKey());
+    if(saved){
+      const parsed=JSON.parse(saved);
+      if(Array.isArray(parsed.answers)&&Number.isInteger(parsed.index)){
+        quizState=parsed;
+        quizState.index=Math.max(0,Math.min(99,quizState.index));
+        return;
+      }
+    }
+  }catch(e){}
+  quizState={index:0,score:0,answers:[],selected:null,answered:false,finished:false};
+  saveQuiz();
+}
+
+function renderQuiz(){
+  if(!currentUser)return;
+  if(quizState.finished){
+    showOnly("resultView");
+    document.getElementById("finalScore").textContent=
+      "Your score: "+quizState.score+" / 100";
+    document.getElementById("finalMessage").textContent=
+      quizState.score>=80?"Excellent work! 🔥":
+      quizState.score>=50?"Good job! Keep learning! 💪":
+      "Keep practising. You can improve tomorrow! 🌟";
+    return;
+  }
+
+  showOnly("quizView");
+  document.getElementById("welcome").textContent="Hello, "+profileName+"!";
+  const i=quizState.index;
+  const q=questions[i];
+
+  document.getElementById("progressText").textContent=
+    "Question "+(i+1)+" of "+questions.length+
+    " • Score: "+quizState.score;
+  document.getElementById("progressBar").style.width=((i+1)/100*100)+"%";
+  document.getElementById("questionText").textContent=(i+1)+". "+q.q;
+  document.getElementById("scoreText").textContent="Score: "+quizState.score;
+  document.getElementById("answerMessage").textContent="";
+  document.getElementById("quizMessage").textContent="";
+
+  const options=document.getElementById("options");
+  options.replaceChildren();
+
+  q.o.forEach((option,index)=>{
+    const b=document.createElement("button");
+    b.className="option";
+    b.textContent=String.fromCharCode(65+index)+". "+option;
+    b.disabled=quizState.answered;
+    if(quizState.selected===index)b.classList.add("selected");
+    b.onclick=()=>{
+      quizState.selected=index;
+      saveQuiz();
+      renderQuiz();
+    };
+    options.appendChild(b);
+  });
+
+  if(quizState.answered){
+    const correct=q.a;
+    document.getElementById("answerMessage").textContent=
+      quizState.selected===correct
+      ?"Correct answer! 🎉"
+      :"Correct answer: "+q.o[correct];
+    document.getElementById("answerMessage").className=
+      quizState.selected===correct?"good":"bad";
+    document.getElementById("quizButton").textContent=
+      i===99?"Finish Challenge":"Next Question →";
+  }else{
+    document.getElementById("quizButton").textContent="Submit Answer";
+  }
+}
+
+window.submitOrNext=function(){
+  if(!currentUser)return;
+  if(!quizState.answered){
+    if(quizState.selected===null){
+      document.getElementById("quizMessage").textContent=
+        "Please select an answer first.";
+      return;
+    }
+    const q=questions[quizState.index];
+    quizState.answered=true;
+    quizState.answers[quizState.index]=quizState.selected;
+    if(quizState.selected===q.a)quizState.score++;
+    saveQuiz();
+    renderQuiz();
+    return;
+  }
+
+  if(quizState.index>=99){
+    quizState.finished=true;
+    saveQuiz();
+    renderQuiz();
+    return;
+  }
+
+  quizState.index++;
+  quizState.selected=null;
+  quizState.answered=false;
+  saveQuiz();
+  renderQuiz();
+};
+
+window.login=async function(){
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  const msg=document.getElementById("authMessage");
+  msg.textContent="";
+
+  if(!email||!password){
+    msg.textContent="Enter your email and password.";
+    return;
+  }
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+  }catch(e){
+    msg.textContent=authError(e.code);
+  }
+};
+
+window.signup=async function(){
+  const name=document.getElementById("signupName").value.trim();
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  const msg=document.getElementById("authMessage");
+
+  if(!name){msg.textContent="Enter your name in the name box.";return;}
+  if(!email||!password){msg.textContent="Enter your email and password.";return;}
+  if(password.length<6){msg.textContent="Password must have at least 6 characters.";return;}
+
+  try{
+    const result=await createUserWithEmailAndPassword(auth,email,password);
+    profileName=name;
+    try{
+      await setDoc(doc(db,"users",result.user.uid),{
+        name:name,email:email,createdAt:new Date().toISOString()
+      },{merge:true});
+    }catch(e){
+      console.log("Profile could not be saved to Firestore",e);
+    }
+  }catch(e){
+    msg.textContent=authError(e.code);
+  }
+};
+
+function authError(code){
+  const messages={
+    "auth/invalid-credential":"Email or password is incorrect.",
+    "auth/user-not-found":"Account not found. Create an account first.",
+    "auth/email-already-in-use":"This email already has an account. Please log in.",
+    "auth/weak-password":"Choose a password with at least 6 characters.",
+    "auth/invalid-email":"Please enter

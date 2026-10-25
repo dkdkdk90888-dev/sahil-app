@@ -476,6 +476,24 @@ window.saveProfile = async function () {
   } catch (e) {}
 })();
 </script>
+
+<section id="dailyChallenge" style="background:#111;color:white;padding:20px;border-radius:16px;margin:20px 0;font-family:Arial,sans-serif;">
+  <h2 style="color:#ff3038;">🔥 Daily Question Challenge</h2>
+  <p>Har din 100 questions. Khelo, score banao aur doston ko challenge karo!</p>
+
+  <div style="background:#222;padding:15px;border-radius:12px;">
+    <p id="questionCount">Question 1 of 100</p>
+    <h3 id="dailyQuestion">Daily challenge taiyar ho raha hai...</h3>
+    <div id="answerOptions"></div>
+    <p id="answerFeedback" aria-live="polite"></p>
+    <button id="nextQuestion" type="button"
+      style="background:#e51b23;color:white;border:0;padding:12px 20px;border-radius:8px;">
+      Next Question →
+    </button>
+  </div>
+
+  <p id="dailyScore">Score: 0 / 100</p>
+</section>
 </body>
 </html>
 

@@ -129,6 +129,10 @@
 
       <div class="profile-box">
         <p id="profileName">Name: Sahil</p>
+        <input id="editName" type="text"  placeholder="Enter your name">
+        <button onclick="saveProfile()">Save     Profile</button>
+        <p id="profileMessage"></p>
+
         <p id="profileEmail"></p>
         <p class="label">App: Sahil App</p>
       </div>
@@ -214,6 +218,37 @@
         $("homeMessage").textContent = explainError(error);
       }
     }
+
+window.saveProfile = async function () {
+  const user = auth.currentUser;
+  const name = document.getElementById("editName").value.trim();
+  const message = document.getElementById("profileMessage");
+
+  if (!user) {
+    message.textContent = "Pehle login karo.";
+    return;
+  }
+
+  if (!name) {
+    message.textContent = "Apna naam likho.";
+    return;
+  }
+
+  message.textContent = "Saving...";
+
+  try {
+    await setDoc(
+      doc(db, "users", user.uid),
+      { name: name, email: user.email },
+      { merge: true }
+    );
+
+    document.getElementById("profileName").textContent = "Name: " + name;
+    message.textContent = "Profile online save ho gayi!";
+  } catch (error) {
+    message.textContent = "Save nahi hua: " + error.message;
+  }
+};
 
     window.login = async function () {
       const email = $("username").value.trim();

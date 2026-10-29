@@ -149,9 +149,32 @@ const data=[
 ];
 let questions=[],index=0,score=0,timer=15,clock=null,answered=false,userName="";
 function show(id){["login","home","quiz","result"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
-function bestKey(){return "sahilQuizBest_"+userName.toLowerCase()}
-function readBest(){try{return Number(localStorage.getItem(bestKey())||0)}catch(e){return 0}}
-function saveBest(n){try{localStorage.setItem(bestKey(),String(n))}catch(e){}}
+function bestKey() {
+  return "sahilQuizBest_" + userName.trim().toLowerCase();
+}
+
+function readBest() {
+  try {
+    const personal = Number(localStorage.getItem(bestKey()) || 0);
+    const general = Number(
+      localStorage.getItem("sahilQuizBestScore") || 0
+    );
+    return Math.max(personal, general, 0);
+  } catch (e) {
+    return 0;
+  }
+}
+
+function saveBest(n) {
+  try {
+    const best = Math.max(Number(n) || 0, readBest());
+    localStorage.setItem(bestKey(), String(best));
+    localStorage.setItem("sahilQuizBestScore", String(best));
+  } catch (e) {
+    console.warn("Best score save nahi hua", e);
+  }
+}
+
 function login(){
  const name=$("username").value.trim(),pin=$("password").value;
  if(!name||pin.length<4){$("loginMsg").textContent="Enter your name and a PIN with at least 4 characters.";return}

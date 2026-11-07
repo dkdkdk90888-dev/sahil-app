@@ -1,116 +1,345 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#e50914">
-<title>SAHIL USA NUMBERS</title>
+<title>Sahil USA Numbers - Admin</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080808;color:white;font-family:Arial,sans-serif}
-header{text-align:center;padding:24px 12px;background:#151515;border-bottom:2px solid #e50914}
-header h1{color:#ff2525;margin:0;font-size:25px}
-header p{color:#aaa;font-size:13px}
-.container{max-width:600px;margin:auto;padding:18px}
-.card{background:#171717;border:1px solid #343434;border-radius:15px;padding:19px;margin-bottom:17px}
-h2{font-size:19px;margin:0 0 15px}
-.small{font-size:12px;color:#aaa}
-.number{font-size:24px;color:#ff3030;text-align:center;background:#080808;border:1px solid #e50914;border-radius:10px;padding:19px 5px;margin:15px 0;font-weight:bold}
-button{width:100%;padding:14px;border:0;border-radius:9px;font-weight:bold;font-size:14px;cursor:pointer;margin-top:9px}
+body{
+ margin:0;background:#090909;color:#fff;
+ font-family:Arial,sans-serif;
+}
+header{
+ background:#151515;padding:20px 12px;
+ text-align:center;border-bottom:2px solid #e50914;
+}
+header h1{color:#ff2525;margin:0;font-size:24px}
+header p{color:#aaa;font-size:12px}
+.container{max-width:650px;margin:auto;padding:16px}
+.card{
+ background:#171717;border:1px solid #333;
+ border-radius:14px;padding:18px;margin-bottom:16px;
+}
+h2{font-size:18px;margin:0 0 15px}
+input{
+ width:100%;padding:14px;margin:7px 0 12px;
+ border:1px solid #444;border-radius:8px;
+ background:#090909;color:white;font-size:15px;
+}
+button{
+ width:100%;padding:14px;border:0;
+ border-radius:8px;font-weight:bold;
+ font-size:14px;margin-top:9px;cursor:pointer;
+}
 .red{background:#e50914;color:white}
-.dark{background:#292929;color:white}
-.message{background:#090909;padding:16px;border-radius:10px;margin-top:12px;color:#bbb;line-height:1.7}
-.message strong{color:#ff3333}
-.tag{color:#ff5555;font-size:11px;font-weight:bold}
+.dark{background:#303030;color:white}
+.number{
+ background:#090909;border:1px solid #e50914;
+ border-radius:10px;padding:18px;
+ color:#ff3333;font-size:23px;
+ text-align:center;font-weight:bold;margin:15px 0;
+}
+.status{font-size:13px;color:#aaa;margin:10px 0}
+.success{color:#42d68b}
+.error{color:#ff5555}
+.message{
+ background:#0b0b0b;border:1px solid #333;
+ padding:13px;border-radius:9px;margin-top:10px;
+ overflow-wrap:anywhere;
+}
+.message strong{color:#ff4545}
+.small{font-size:12px;color:#999;line-height:1.6}
+.hidden{display:none}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toprow button{width:auto;padding:10px 15px}
 footer{text-align:center;color:#777;padding:20px;font-size:12px}
 </style>
 </head>
+
 <body>
 
 <header>
 <h1>🇺🇸 SAHIL USA NUMBERS</h1>
-<p>Virtual Number & SMS Demo Platform</p>
+<p>PRIVATE ADMIN DASHBOARD</p>
 </header>
 
 <div class="container">
 
+<!-- LOGIN -->
+<section id="loginSection" class="card">
+<h2>🔐 Admin Login</h2>
+<p class="small">Login with your registered Firebase email and password.</p>
+
+<form id="loginForm">
+<input id="email" type="email" placeholder="Admin Email" required>
+<input id="password" type="password" placeholder="Password" required>
+<button class="red" type="submit">LOGIN TO DASHBOARD</button>
+</form>
+
+<p id="loginStatus" class="status"></p>
+</section>
+
+<!-- ADMIN DASHBOARD -->
+<section id="dashboard" class="hidden">
+
 <div class="card">
-<span class="tag">USA NUMBER GENERATOR</span>
-<h2 style="margin-top:10px">📱 Select Your Number</h2>
+<div class="toprow">
+<h2>👑 Admin Panel</h2>
+<button class="dark" id="logoutBtn">Logout</button>
+</div>
+<p class="status success">● Admin authenticated</p>
+<p class="small">Your private dashboard is active.</p>
+</div>
+
+<div class="card">
+<h2>📱 USA Demo Number Generator</h2>
 <div class="number" id="number">+1 (202) 555-0101</div>
-<button class="red" onclick="generate()">🔄 Generate New Number</button>
-<button class="dark" onclick="copyNumber()">📋 Copy Number</button>
-<p class="small">Fictional test numbers only. Not valid for real calls or SMS.</p>
+<button class="red" id="generateBtn">Generate New Number</button>
+<button class="dark" id="copyBtn">Copy Number</button>
+<p class="small">Fictional test numbers only. They cannot receive real calls or SMS.</p>
 </div>
 
 <div class="card">
-<h2>📩 SMS Inbox</h2>
-<p class="small">Selected demo number:</p>
-<strong id="selected">+1 (202) 555-0101</strong>
-<div class="message" id="inbox">
-📭 No messages yet.
+<div class="toprow">
+<h2>📩 Private SMS Inbox</h2>
+<span class="status success" id="liveStatus">Connecting...</span>
 </div>
-<button class="red" onclick="testOTP()">Generate Test OTP</button>
-<button class="dark" onclick="clearInbox()">Clear Inbox</button>
-<p class="small">Test OTP is simulated. No real SMS is received.</p>
+
+<p class="small">Only your authorized admin account can read this inbox.</p>
+<div id="inbox">
+<div class="message">Loading messages...</div>
+</div>
+<button class="dark" id="refreshBtn">↻ Refresh Inbox</button>
 </div>
 
 <div class="card">
-<h2>ℹ️ About</h2>
-<p class="small">SAHIL USA NUMBERS is a demonstration website. Real USA virtual numbers and incoming SMS require an authorized SMS provider and backend integration.</p>
+<h2>🔒 Security Information</h2>
+<p class="small">
+Admin access is restricted by Firebase Authentication UID.
+Inbox messages are read-only from this website.
+Real SMS requires an authorized provider and secure backend.
+</p>
 </div>
+
+</section>
 
 </div>
 
 <footer>© 2026 SAHIL USA NUMBERS</footer>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
-const nums = [
-"+1 (202) 555-0101",
-"+1 (202) 555-0102",
-"+1 (202) 555-0103",
-"+1 (202) 555-0104",
-"+1 (202) 555-0105",
-"+1 (202) 555-0106",
-"+1 (202) 555-0107",
-"+1 (202) 555-0108",
-"+1 (202) 555-0109",
-"+1 (202) 555-0110"
-];
 
-let current = nums[0];
+// FIREBASE CONFIGURATION
+const firebaseConfig = {
+ apiKey: "AIzaSyB_EQa914negHJUDyHwIU7QzI26nnv445U",
+ authDomain: "sahilapp-22410.firebaseapp.com",
+ projectId: "sahilapp-22410",
+ storageBucket: "sahilapp-22410.firebasestorage.app",
+ messagingSenderId: "1062905599098",
+ appId: "1:1062905599098:web:a114d33d78c40f3293d7c3",
+ measurementId: "G-1Q1379E1DH"
+};
 
-function generate(){
- let available=nums.filter(n=>n!==current);
- current=available[Math.floor(Math.random()*available.length)];
- document.getElementById("number").textContent=current;
- document.getElementById("selected").textContent=current;
- clearInbox();
+// ADMIN UID
+const ADMIN_UID = "Xxn1i7jciqOcfovbPefEiVt4aGU2";
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const loginSection = document.getElementById("loginSection");
+const dashboard = document.getElementById("dashboard");
+const loginStatus = document.getElementById("loginStatus");
+const inbox = document.getElementById("inbox");
+
+let unsubscribeInbox = null;
+
+// AUTHENTICATION
+auth.onAuthStateChanged(async user => {
+
+ if(user && user.uid === ADMIN_UID){
+
+  loginSection.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+
+  startInbox();
+
+ }else{
+
+  stopInbox();
+  dashboard.classList.add("hidden");
+  loginSection.classList.remove("hidden");
+
+  if(user){
+   await auth.signOut();
+   loginStatus.textContent = "Access denied: Admin only.";
+   loginStatus.className = "status error";
+  }
+ }
+});
+
+// LOGIN
+document.getElementById("loginForm")
+.addEventListener("submit",async e=>{
+
+ e.preventDefault();
+
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
+
+ loginStatus.textContent = "Checking login...";
+ loginStatus.className = "status";
+
+ try{
+
+  const result = await auth.signInWithEmailAndPassword(email,password);
+
+  if(result.user.uid !== ADMIN_UID){
+   await auth.signOut();
+   throw new Error("This account is not authorized as admin.");
+  }
+
+  loginStatus.textContent = "Login successful!";
+
+ }catch(error){
+
+  loginStatus.textContent = error.message;
+  loginStatus.className = "status error";
+ }
+});
+
+// LOGOUT
+document.getElementById("logoutBtn")
+.addEventListener("click",async()=>{
+ stopInbox();
+ await auth.signOut();
+});
+
+// PRIVATE LIVE INBOX
+function startInbox(){
+
+ stopInbox();
+
+ inbox.textContent = "Connecting to private inbox...";
+
+ unsubscribeInbox = db.collection("adminSms")
+ .onSnapshot(snapshot=>{
+
+  inbox.innerHTML = "";
+
+  if(snapshot.empty){
+   inbox.textContent = "📭 No messages received yet.";
+   document.getElementById("liveStatus").textContent = "● Live";
+   return;
+  }
+
+  const docs = snapshot.docs.map(doc=>({
+   id:doc.id,
+   data:doc.data()
+  }));
+
+  docs.sort((a,b)=>{
+   return getDate(b.data)-getDate(a.data);
+  });
+
+  docs.forEach(item=>{
+
+   const data = item.data;
+
+   const box = document.createElement("div");
+   box.className = "message";
+
+   const sender = document.createElement("strong");
+   sender.textContent = "From: " +
+    (data.from || data.sender || "Unknown");
+
+   const body = document.createElement("p");
+   body.textContent =
+    data.body || data.message || "No message text";
+
+   const date = document.createElement("p");
+   date.className = "small";
+   date.textContent = formatDate(data);
+
+   box.append(sender,body,date);
+   inbox.appendChild(box);
+  });
+
+  document.getElementById("liveStatus").textContent = "● Live";
+
+ },error=>{
+
+  inbox.textContent = "Inbox error: " + error.message;
+  document.getElementById("liveStatus").textContent = "● Error";
+
+ });
 }
 
-function copyNumber(){
- if(navigator.clipboard){
-  navigator.clipboard.writeText(current)
-  .then(()=>alert("Number copied!"))
-  .catch(()=>alert("Copy this number: "+current));
- }else{
-  alert("Copy this number: "+current);
+function stopInbox(){
+ if(unsubscribeInbox){
+  unsubscribeInbox();
+  unsubscribeInbox = null;
  }
 }
 
-function testOTP(){
- const otp=String(Math.floor(100000+Math.random()*900000));
- document.getElementById("inbox").innerHTML=
- "📨 <strong>DEMO MESSAGE</strong><br>"+
- "To: "+current+"<br>"+
- "Test OTP: <strong>"+otp+"</strong><br>"+
- "<span class='small'>Simulated test code — not from WhatsApp or any real service.</span>";
+function getDate(data){
+ const value = data.receivedAt || data.createdAt || data.timestamp;
+ if(value && typeof value.toDate === "function"){
+  return value.toDate().getTime();
+ }
+ if(value){
+  const d = new Date(value).getTime();
+  return isNaN(d) ? 0 : d;
+ }
+ return 0;
 }
 
-function clearInbox(){
- document.getElementById("inbox").textContent="📭 No messages yet.";
+function formatDate(data){
+ const time = getDate(data);
+ return time ? new Date(time).toLocaleString() : "Date unavailable";
 }
+
+// DEMO NUMBER GENERATOR
+const numbers = Array.from({length:100},(_,i)=>
+ "+1 (202) 555-"+String(100+i).padStart(4,"0")
+);
+
+let current = numbers[0];
+
+document.getElementById("generateBtn")
+.addEventListener("click",()=>{
+ let options = numbers.filter(n=>n!==current);
+ current = options[Math.floor(Math.random()*options.length)];
+ document.getElementById("number").textContent = current;
+});
+
+document.getElementById("copyBtn")
+.addEventListener("click",async()=>{
+ try{
+  await navigator.clipboard.writeText(current);
+  alert("Demo number copied!");
+ }catch(e){
+  alert("Number: "+current);
+ }
+});
+
+document.getElementById("refreshBtn")
+.addEventListener("click",()=>{
+ if(auth.currentUser && auth.currentUser.uid === ADMIN_UID){
+  startInbox();
+ }
+});
+
 </script>
+
 </body>
 </html>
